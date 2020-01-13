@@ -198,7 +198,7 @@ export const constantRoutes = [
       },
       {
         path: '/usermenu',
-        component: Layout,
+        component: () => import('@/views/setting/user/index'),
         name: 'UserMenu',
         meta: { title: '用戶管理' },
         children: [
@@ -289,7 +289,7 @@ export const constantRoutes = [
             meta: { title: '賬戶設定' }
           },
           {
-            path: 'warehous水',
+            path: 'warehouse',
             component: () => import('@/views/nested/menu1/menu1-1'),
             name: 'warehouse',
             meta: { title: '常用項目設定' }
