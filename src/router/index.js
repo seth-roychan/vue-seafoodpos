@@ -163,8 +163,8 @@ export const constantRoutes = [
             component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
             name: 'region',
             meta: { title: '區域設定' }
-          }
-          ]},
+          }]
+      },
       {
         path: 'vendormenu',
         component: () => import('@/views/nested/menu1/menu1-3'),
@@ -197,8 +197,8 @@ export const constantRoutes = [
           }]
       },
       {
-        path: 'usermenu',
-        component: () => import('@/views/nested/menu2/index'),
+        path: '/usermenu',
+        component: Layout,
         name: 'UserMenu',
         meta: { title: '用戶管理' },
         children: [
@@ -213,6 +213,12 @@ export const constantRoutes = [
             component: () => import('@/views/nested/menu1/menu1-1'),
             name: 'usergroup',
             meta: { title: '用戶群組' }
+          },
+          {
+            path: 'department',
+            component: () => import('@/views/setting/user/departmentlist'),
+            name: 'department',
+            meta: { title: '部門設定' }
           }]
       },
       {
@@ -319,9 +325,9 @@ export const constantRoutes = [
             name: 'currency',
             meta: { title: '檔案路徑設定' }
           }]
-        }]
+      }
+    ]
   },
-
   {
     path: '/setting',
     component: Layout,
@@ -330,14 +336,9 @@ export const constantRoutes = [
         path: 'index',
         name: 'Setting',
         component: () => import('@/views/setting/index'),
-        meta: { title: '進階功能', icon: 'form' },
-
+        meta: { title: '進階功能', icon: 'form' }
       }]
   },
-
-
-
-
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
