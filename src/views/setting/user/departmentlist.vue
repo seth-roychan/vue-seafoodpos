@@ -21,98 +21,94 @@
         Export
       </el-button>
     </div>
-     <el-table
+    <el-table
       v-loading="listLoading"
       :data="list"
       element-loading-text="Loading"
       border
       fit
-      highlight-current-row>
+      highlight-current-row
+    >
 
-      <el-table-column align="center" label="Department ID" width="120">
+      <el-table-column align="center" label="記錄編號" width="120">
         <template slot-scope="scope">
           {{ scope.row.departmentid }}
         </template>
       </el-table-column>
-      <el-table-column label="Description">
+      <el-table-column label="名稱描述">
         <template slot-scope="scope">
           {{ scope.row.description }}
         </template>
       </el-table-column>
-      <el-table-column label="Default Record" width="110" align="center">
+      <el-table-column label="排序優先" width="110" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.priority }}
+        </template>
+      </el-table-column>
+      <el-table-column label="預設記錄" width="110" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.defaultrecord }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Priority" width="110" align="center">
+        <el-table-column label="記錄狀態" width="110" align="center">
         <template slot-scope="scope">
-          {{ scope.row.priority}}
+            {{ scope.row.active }}
         </template>
       </el-table-column>
-
-
-<!--       <el-table-column class-name="status-col" label="Status" width="110" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
-        </template>
-      </el-table-column> -->
-      <el-table-column align="center" prop="created_at" label="Create Date" width="200">
+      <el-table-column align="center" prop="created_at" label="建檔日期" width="200">
         <template slot-scope="scope">
           <!-- <i class="el-icon-time" /> -->
           <span>{{ scope.row.createdate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Lastup Update User" width="110" align="center">
+      <el-table-column label="最後更新" width="110" align="center">
         <template slot-scope="scope">
-          {{ scope.row.lastupdateuser}}
+          {{ scope.row.lastupdate }}
         </template>
       </el-table-column>
-
-       <el-table-column label="Lastup Update" width="110" align="center">
+      <el-table-column label="更新用戶" width="110" align="center">
         <template slot-scope="scope">
-          {{ scope.row.lastupdate}}
+          {{ scope.row.lastupdateuser }}
         </template>
       </el-table-column>
-
-      <el-table-column label="操作" align="center" width="230">
-      <template slot-scope="scope">
-        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">
-          編輯
-        </el-button>
-        <el-button
-          size="mini"
-          type="danger"
-          @click="handleDelete(scope.row)">删除</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+      <el-table-column label="操作" align="center" width="200">
+        <template slot-scope="scope">
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">
+            編輯
+          </el-button>
+          <el-button
+            size="mini"
+            type="danger"
+            @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
     <!-- <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /> -->
- <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-    <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-       <el-form-item label="DeparmentID" prop="departmentid">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="記錄編號" prop="departmentid">
           <el-input v-model="temp.departmentid" />
         </el-form-item>
-        <el-form-item label="Description" prop="description">
+        <el-form-item label="名稱描述" prop="description">
           <el-input v-model="temp.description" />
         </el-form-item>
-        <el-form-item label="Priority" prop="priority">
-          <el-input v-model="temp.priority" />
+        <el-form-item label="排序優先" prop="priority">
+          <el-input-number v-model.number="temp.priority" />
         </el-form-item>
-        <el-form-item label="預設記錄" prop="defaultrecord">
-          <el-switch v-model="temp.defaultrecord"></el-switch>
+        <el-form-item label="預設記錄">
+          <el-switch v-model="temp.defaultrecord" :active-value="1" :inactive-value="0" />
         </el-form-item>
-        <el-form-item label="記錄狀態" prop="active">
-          <el-switch v-model="temp.active"></el-switch>
+        <el-form-item label="記錄狀態">
+          <el-switch v-model="temp.active" :active-value="1" :inactive-value="0" />
         </el-form-item>
-
-        <el-form-item label="Create Date" prop="timestamp">
-          <el-date-picker v-model="temp.createdate" type="datetime" />
+        <el-form-item label="建檔日期" prop="datestamp">
+          <el-date-picker v-model="temp.createdate" type="date" />
         </el-form-item>
-        <el-form-item label="Last Update" prop="timestamp">
+        <el-form-item label="最後更新" prop="timestamp">
           <el-date-picker v-model="temp.lastupdate" type="datetime" />
         </el-form-item>
-        <el-form-item label="Last Update User" prop="lastupdateuser">
+        <el-form-item label="修改用戶" prop="lastupdateuser">
           <el-input v-model="temp.lastupdateuser" />
         </el-form-item>
       </el-form>
@@ -138,9 +134,10 @@
 </template>
 
 <script>
-//import { getList } from '@/api/table'
+// import { getList } from '@/api/table'
 import axios from 'axios'
-//import waves from '@/directive/waves' // waves directive
+// import waves from '@/directive/waves' // waves directive
+// eslint-disable-next-line no-unused-vars
 import { parseTime } from '@/utils'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -157,7 +154,7 @@ export default {
       }
       return statusMap[status]
     }
-/*     typeFilter(type) {
+    /*     typeFilter(type) {
       return calendarTypeKeyValue[type]
     } */
   },
@@ -183,24 +180,24 @@ export default {
       temp: {
         departmentid: undefined,
         description: '',
-        defaultrecord: 0,
         priority: 1,
+        defaultrecord: 0,
+        active: 1,
         createdate: new Date(),
         lastupdate: new Date(),
-        lastupdateuser: '',
-        active: 1
+        lastupdateuser: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '修改記錄',
+        create: '新增記錄'
       },
       dialogPvVisible: false,
       pvData: [],
-      rules: { type: [{ required: true, message: 'type is required', trigger: 'change' }],
-               timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-               description: [{ required: true, message: 'title is required', trigger: 'blur' }]
+      rules: { active: [{ required: true, message: 'Active is required', trigger: 'blur' }],
+        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
+        description: [{ required: true, message: 'Description is required', trigger: 'blur' }]
       }
     }
   },
@@ -209,29 +206,30 @@ export default {
     this.getDepartments()
   },
   methods: {
-    getDepartments: function(){
-        this.listLoading = true
-        axios.get('http://localhost/api/read.php')
-              .then((response) => {
-                    console.log(response.data)
-                    this.list = response.data
-                    this.total = response.data.total
-                    this.listLoading = false
-                })
+    getDepartments: function() {
+      this.listLoading = true
+      axios.get('http://localhost/api/read.php')
+        .then((response) => {
+          console.log(response.data)
+          this.list = response.data
+          this.total = response.data.total
+          this.listLoading = false
+        })
         .catch((error) => {
-                    console.log(error)
-                }
+          console.log(error)
+        }
         )
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        departmentid: undefined,
+        description: '',
+        priority: 1,
+        defaultrecord: 0,
+        active: 1,
+        createdate: new Date(),
+        lastupdate: new Date(),
+        lastupdateuser: ''
       }
     },
     handleCreate() {
@@ -253,7 +251,7 @@ export default {
     },
     handleDownload() {
       this.downloadLoading = true
-/*       import('@/vendor/Export2Excel').then(excel => {
+      /*       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
         const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
         const data = this.formatJson(filterVal, this.list)
