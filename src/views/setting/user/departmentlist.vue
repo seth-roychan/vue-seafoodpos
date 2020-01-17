@@ -94,7 +94,7 @@
           <el-input v-model="temp.description" />
         </el-form-item>
         <el-form-item label="排序優先" prop="priority">
-          <el-input-number v-model.number="temp.priority" />
+          <el-input-number v-model.number="temp.priority" :min="1" :max="99" />
         </el-form-item>
         <el-form-item label="預設記錄">
           <el-switch v-model="temp.defaultrecord" :active-value="1" :inactive-value="0" />
@@ -103,10 +103,10 @@
           <el-switch v-model="temp.active" :active-value="1" :inactive-value="0" />
         </el-form-item>
         <el-form-item label="建檔日期" prop="datestamp">
-          <el-date-picker v-model="temp.createdate" type="date" />
+          <el-date-picker v-model="temp.createdate" type="date" readonly="true" />
         </el-form-item>
         <el-form-item label="最後更新" prop="timestamp">
-          <el-date-picker v-model="temp.lastupdate" type="datetime" />
+          <el-date-picker v-model="temp.lastupdate" type="datetime" readonly="true" />
         </el-form-item>
         <el-form-item label="修改用戶" prop="lastupdateuser">
           <el-input v-model="temp.lastupdateuser" />
@@ -116,7 +116,8 @@
         <el-button @click="dialogFormVisible = false">
           Cancel
         </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+        <!-- <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()"> -->
+        <el-button type="primary" @click="handleSubmit()">
           Confirm
         </el-button>
       </div>
@@ -196,7 +197,6 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: { active: [{ required: true, message: 'Active is required', trigger: 'blur' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
         description: [{ required: true, message: 'Description is required', trigger: 'blur' }]
       }
     }
@@ -271,7 +271,71 @@ export default {
       })
       const index = this.list.indexOf(row)
       this.list.splice(index, 1)
+    },
+    handleSubmit() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
+          // this.temp.author = 'vue-element-admin'
+          // createArticle(this.temp).then(() => {
+          //  this.list.unshift(this.temp)
+          this.dialogFormVisible = false
+          this.$notify({
+            title: 'Success',
+            message: 'Created Successfully',
+            type: 'success',
+            duration: 2000
+          })
+          // })
+        }
+      })
+    },
+    createDepartment: function() {
+      console.log('Create Department!')
+      // eslint-disable-next-line prefer-const
+      let formData = new FormData()
+      console.log('Description:', this.temp.description)
+      formData.append('departmentid', -1)
+      formData.append('description', this.temp.description)
+      formData.append('priority', this.temp.priority)
+      formData.append('defaultrecord', this.temp.defaultrecord)
+      formData.append('active', this.temp.active)
+      formData.append('lastupdateuser', 'Admin')
+
+      var department = {}
+      formData.forEach(function(value, key) {
+        department[key] = value
+      })
+
+      axios({
+        method: 'post',
+        url: 'api/contacts.php',
+        data: formData,
+        config: { headers: {'Content-Type': 'multipart/form-data' }}
+      })
+        .then(function (response) {
+            //handle success
+            console.log(response)
+            app.contacts.push(contact)
+            app.resetForm();
+        })
+        .catch(function (response) {
+            //handle error
+            console.log(response)
+        });
     }
+    /*     handleSubmit() {
+      const t = this
+      t.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          alert('submit!')
+          // console.log(this.dataForm)
+        } else {
+          console.log('error submit!!')
+        //  return false;
+        }
+      })
+    } */
   }
 }
 </script>
