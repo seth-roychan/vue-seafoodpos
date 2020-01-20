@@ -142,7 +142,6 @@ import axios from 'axios'
 import { parseTime } from '@/utils'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-
 export default {
 //  components: { Pagination },
 // directives: { waves },
@@ -208,7 +207,7 @@ export default {
   methods: {
     getDepartments: function() {
       this.listLoading = true
-      axios.get('http://localhost/api/read.php')
+      axios.get('http://localhost/api/department.php?action=read')
         .then((response) => {
           console.log(response.data)
           this.list = response.data
@@ -275,10 +274,11 @@ export default {
     handleSubmit() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          // this.temp.author = 'vue-element-admin'
-          // createArticle(this.temp).then(() => {
-          //  this.list.unshift(this.temp)
+          if (this.dialogStatus === 'create') {
+            this.createDepartment()
+          } else {
+            this.updateDepartment()
+          }
           this.dialogFormVisible = false
           this.$notify({
             title: 'Success',
@@ -286,7 +286,6 @@ export default {
             type: 'success',
             duration: 2000
           })
-          // })
         }
       })
     },
@@ -302,29 +301,59 @@ export default {
       formData.append('active', this.temp.active)
       formData.append('lastupdateuser', 'Admin')
 
-      var department = {}
-      formData.forEach(function(value, key) {
-        department[key] = value
+      axios({
+        method: 'post',
+        url: 'api/department.php?action=create',
+        data: formData,
+        config: { headers: { 'Content-Type': 'application/form-data' }}
       })
+        .then(function(response) {
+          // handle success
+          console.log(response)
+          this.resetTemp()
+        })
+        .catch(function(response) {
+          // handle error
+          console.log(response)
+        })
+    },
+    updateDepartment: function() {
+      console.log('Update Department!')
+      // eslint-disable-next-line prefer-const
+      let formData = new FormData()
+      console.log('Description:', this.temp.description)
+      formData.append('departmentid', this.temp.departmentid)
+      formData.append('description', this.temp.description)
+      formData.append('priority', this.temp.priority)
+      formData.append('defaultrecord', this.temp.defaultrecord)
+      formData.append('active', this.temp.active)
+      formData.append('lastupdateuser', 'Admin')
 
       axios({
         method: 'post',
-        url: 'api/contacts.php',
+        url: 'http://localhost/api/department.php?action=update',
         data: formData,
-        config: { headers: {'Content-Type': 'multipart/form-data' }}
+        config: { headers: { 'Content-Type': 'application/form-data' }}
       })
-        .then(function (response) {
-            //handle success
-            console.log(response)
-            app.contacts.push(contact)
-            app.resetForm();
+        .then(function(response) {
+          // handle success
+          console.log(response)
+          // this.resetTemp()
         })
-        .catch(function (response) {
-            //handle error
-            console.log(response)
-        });
-    }
-    /*     handleSubmit() {
+        .catch(function(response) {
+          // handle error
+          console.log(response)
+        })
+      // this.dialogFormVisible = false
+/*       this.$notify({
+        title: 'Success',
+        message: 'Update Successfully',
+        type: 'success',
+        duration: 2000
+
+      }) */
+    } }
+  /*     handleSubmit() {
       const t = this
       t.$refs['dataForm'].validate((valid) => {
         if (valid) {
@@ -336,6 +365,7 @@ export default {
         }
       })
     } */
-  }
+
 }
+
 </script>
