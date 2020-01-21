@@ -216,8 +216,7 @@ export default {
         })
         .catch((error) => {
           console.log(error)
-        }
-        )
+        })
     },
     resetTemp() {
       this.temp = {
@@ -231,6 +230,13 @@ export default {
         lastupdateuser: ''
       }
     },
+    toFormData: function(obj) {
+      var form_data = new FormData()
+      for (var key in obj) {
+        form_data.append(key, obj[key])
+      }
+      return form_data
+    },
     handleCreate() {
       this.resetTemp()
       this.dialogStatus = 'create'
@@ -241,7 +247,8 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.temp.lastupdate = new Date()
+      this.temp.lastupdateuser = 'Admin'
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -286,20 +293,15 @@ export default {
             type: 'success',
             duration: 2000
           })
+          this.getDepartments
         }
       })
     },
     createDepartment: function() {
       console.log('Create Department!')
       // eslint-disable-next-line prefer-const
-      let formData = new FormData()
+      let formData = this.toFormData(this.temp)
       console.log('Description:', this.temp.description)
-      formData.append('departmentid', -1)
-      formData.append('description', this.temp.description)
-      formData.append('priority', this.temp.priority)
-      formData.append('defaultrecord', this.temp.defaultrecord)
-      formData.append('active', this.temp.active)
-      formData.append('lastupdateuser', 'Admin')
 
       axios({
         method: 'post',
@@ -311,6 +313,7 @@ export default {
           // handle success
           console.log(response)
           this.resetTemp()
+
         })
         .catch(function(response) {
           // handle error
@@ -320,15 +323,7 @@ export default {
     updateDepartment: function() {
       console.log('Update Department!')
       // eslint-disable-next-line prefer-const
-      let formData = new FormData()
-      console.log('Description:', this.temp.description)
-      formData.append('departmentid', this.temp.departmentid)
-      formData.append('description', this.temp.description)
-      formData.append('priority', this.temp.priority)
-      formData.append('defaultrecord', this.temp.defaultrecord)
-      formData.append('active', this.temp.active)
-      formData.append('lastupdateuser', 'Admin')
-
+      let formData = this.toFormData(this.temp)
       axios({
         method: 'post',
         url: 'http://localhost/api/department.php?action=update',
@@ -345,7 +340,7 @@ export default {
           console.log(response)
         })
       // this.dialogFormVisible = false
-/*       this.$notify({
+      /* this.$notify({
         title: 'Success',
         message: 'Update Successfully',
         type: 'success',
