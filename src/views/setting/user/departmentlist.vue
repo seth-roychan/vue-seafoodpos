@@ -312,8 +312,8 @@ export default {
         .then(function(response) {
           // handle success
           console.log(response)
+          this.list.unshift(this.temp)
           this.resetTemp()
-
         })
         .catch(function(response) {
           // handle error
@@ -333,6 +333,14 @@ export default {
         .then(function(response) {
           // handle success
           console.log(response)
+          for (var item of this.list) {
+            if (item.departmentid === this.temp.departmentid) {
+              const index = this.list.indexOf(item)
+              this.list.splice(index, 1, this.temp)
+              break
+            }
+          }
+
           // this.resetTemp()
         })
         .catch(function(response) {
