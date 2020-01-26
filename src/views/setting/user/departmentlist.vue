@@ -309,7 +309,7 @@ export default {
         data: formData,
         config: { headers: { 'Content-Type': 'application/form-data' }}
       })
-        .then(function(response) {
+        .then((response) => {
           // handle success
           console.log(response)
           this.list.unshift(this.temp)
@@ -323,39 +323,30 @@ export default {
     updateDepartment: function() {
       console.log('Update Department!')
       // eslint-disable-next-line prefer-const
-      let formData = this.toFormData(this.temp)
+      let formData = this.toFormData(this.temp) 
       axios({
         method: 'post',
         url: 'http://localhost/api/department.php?action=update',
         data: formData,
         config: { headers: { 'Content-Type': 'application/form-data' }}
       })
-        .then(function(response) {
+        .then((response) => {
           // handle success
           console.log(response)
-          for (var item of this.list) {
-            if (item.departmentid === this.temp.departmentid) {
-              const index = this.list.indexOf(item)
+          for (const v of this.list) {
+            if (v.departmentid === this.temp.departmentid) {
+              const index = this.list.indexOf(v)
               this.list.splice(index, 1, this.temp)
               break
             }
           }
-
-          // this.resetTemp()
         })
         .catch(function(response) {
           // handle error
           console.log(response)
         })
-      // this.dialogFormVisible = false
-      /* this.$notify({
-        title: 'Success',
-        message: 'Update Successfully',
-        type: 'success',
-        duration: 2000
-
-      }) */
-    } }
+    }
+  }
   /*     handleSubmit() {
       const t = this
       t.$refs['dataForm'].validate((valid) => {
