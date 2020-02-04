@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-<div class="filter-container">
-<!--           <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
+    <div class="filter-container">
+        <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+<!--         <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
       <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
@@ -10,10 +10,10 @@
       </el-select>
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
+      </el-select> -->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
-      </el-button> -->
+      </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Add
       </el-button>
@@ -29,7 +29,6 @@
       fit
       highlight-current-row
     >
-
       <el-table-column align="center" label="記錄編號" width="120">
         <template slot-scope="scope">
           {{ scope.row.departmentid }}
@@ -50,18 +49,18 @@
           <span>{{ scope.row.defaultrecord }}</span>
         </template>
       </el-table-column>
-        <el-table-column label="記錄狀態" width="110" align="center">
+      <el-table-column label="記錄狀態" width="110" align="center">
         <template slot-scope="scope">
-            {{ scope.row.active }}
+          {{ scope.row.active }}
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="created_at" label="建檔日期" width="200">
+      <el-table-column align="center" prop="created_at" label="建檔日期" width="100">
         <template slot-scope="scope">
           <!-- <i class="el-icon-time" /> -->
           <span>{{ scope.row.createdate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最後更新" width="110" align="center">
+      <el-table-column label="最後更新" width="160" align="center">
         <template slot-scope="scope">
           {{ scope.row.lastupdate }}
         </template>
@@ -79,7 +78,9 @@
           <el-button
             size="mini"
             type="danger"
-            @click="handleDelete(scope.row)">删除</el-button>
+            @click="handleDelete(scope.row)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -88,13 +89,13 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
         <el-form-item label="記錄編號" prop="departmentid">
-          <el-input v-model="temp.departmentid" />
+          <el-input v-model="temp.departmentid" readonly="true" />
         </el-form-item>
         <el-form-item label="名稱描述" prop="description">
           <el-input v-model="temp.description" />
         </el-form-item>
         <el-form-item label="排序優先" prop="priority">
-          <el-input-number v-model.number="temp.priority" :min="1" :max="99" />
+          <el-input-number v-model.number="temp.priority" type="number" :min="1" :max="99" />
         </el-form-item>
         <el-form-item label="預設記錄">
           <el-switch v-model="temp.defaultrecord" :active-value="1" :inactive-value="0" />
@@ -103,13 +104,13 @@
           <el-switch v-model="temp.active" :active-value="1" :inactive-value="0" />
         </el-form-item>
         <el-form-item label="建檔日期" prop="datestamp">
-          <el-date-picker v-model="temp.createdate" type="date" readonly="true" />
+          <el-date-picker v-model="temp.createdate" type="date" value-format="yyyy-MM-dd" readonly="true" />
         </el-form-item>
         <el-form-item label="最後更新" prop="timestamp">
-          <el-date-picker v-model="temp.lastupdate" type="datetime" readonly="true" />
+          <el-date-picker v-model="temp.lastupdate" type="datetime" value-format="yyyy-MM-dd" readonly="true" />
         </el-form-item>
-        <el-form-item label="修改用戶" prop="lastupdateuser">
-          <el-input v-model="temp.lastupdateuser" />
+        <el-form-item label="修改用戶" prop="lastupdateuser" >
+          <el-input v-model="temp.lastupdateuser" readonly="true" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -140,6 +141,8 @@ import axios from 'axios'
 // import waves from '@/directive/waves' // waves directive
 // eslint-disable-next-line no-unused-vars
 import { parseTime } from '@/utils'
+import { formatDate } from '@/utils/formatfunct'
+import { formatDateTime } from '@/utils/formatfunct'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
@@ -174,7 +177,7 @@ export default {
       },
       importanceOptions: [1, 2, 3],
       // calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
+      sortOptions: [{ label: 'ID Ascending', key: '+departmentid' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
@@ -220,14 +223,14 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        departmentid: undefined,
+        departmentid: 'New',
         description: '',
         priority: 1,
         defaultrecord: 0,
         active: 1,
         createdate: new Date(),
         lastupdate: new Date(),
-        lastupdateuser: ''
+        lastupdateuser: 'Admin'
       }
     },
     toFormData: function(obj) {
@@ -289,7 +292,7 @@ export default {
           this.dialogFormVisible = false
           this.$notify({
             title: 'Success',
-            message: 'Created Successfully',
+            message: 'Saved Successfully',
             type: 'success',
             duration: 2000
           })
@@ -300,18 +303,21 @@ export default {
     createDepartment: function() {
       console.log('Create Department!')
       // eslint-disable-next-line prefer-const
-      let formData = this.toFormData(this.temp)
+      this.temp.createdate = formatDate(this.temp.createdate)
+      this.temp.lastupdate = formatDateTime(this.temp.lastupdate)
+      const formData = this.toFormData(this.temp)
       console.log('Description:', this.temp.description)
 
       axios({
         method: 'post',
-        url: 'api/department.php?action=create',
+        url: 'http://localhost/api/department.php?action=create',
         data: formData,
         config: { headers: { 'Content-Type': 'application/form-data' }}
       })
         .then((response) => {
           // handle success
           console.log(response)
+          this.temp.departmentid = response.data
           this.list.unshift(this.temp)
           this.resetTemp()
         })
@@ -322,8 +328,8 @@ export default {
     },
     updateDepartment: function() {
       console.log('Update Department!')
-      // eslint-disable-next-line prefer-const
-      let formData = this.toFormData(this.temp) 
+      this.temp.lastupdate = formatDateTime(this.temp.lastupdate)
+      const formData = this.toFormData(this.temp)
       axios({
         method: 'post',
         url: 'http://localhost/api/department.php?action=update',
