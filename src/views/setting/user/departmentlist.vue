@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-        <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.description" placeholder="Description" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
 <!--         <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
@@ -21,71 +21,76 @@
         Export
       </el-button>
     </div>
+
     <el-table
+      :key="tableKey"
       v-loading="listLoading"
       :data="list"
       element-loading-text="Loading"
       border
       fit
       highlight-current-row
+      style="width: 100%;"
+      @sort-change="sortChange"
     >
-      <el-table-column align="center" label="記錄編號" width="120">
-        <template slot-scope="scope">
-          {{ scope.row.departmentid }}
+      <el-table-column label="記錄編號" prop="departmentid" sortable="custom" align="center" width="120">
+        <template slot-scope="{row}">
+          <span>{{ row.departmentid }}</span>
         </template>
       </el-table-column>
       <el-table-column label="名稱描述">
-        <template slot-scope="scope">
-          {{ scope.row.description }}
+        <template slot-scope="{row}">
+          <span>{{ row.description }}</span>
         </template>
       </el-table-column>
       <el-table-column label="排序優先" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.priority }}
+        <template slot-scope="{row}">
+          <span>{{ row.priority }}</span>
         </template>
       </el-table-column>
       <el-table-column label="預設記錄" width="110" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.defaultrecord }}</span>
+        <template slot-scope="{row}">
+          <span>{{ row.defaultrecord }}</span>
         </template>
       </el-table-column>
       <el-table-column label="記錄狀態" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.active }}
+        <template slot-scope="{row}">
+          <span>{{ row.active }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="created_at" label="建檔日期" width="100">
-        <template slot-scope="scope">
+      <el-table-column align="center" prop="createdate" label="建檔日期" width="100">
+        <template slot-scope="{row}">
           <!-- <i class="el-icon-time" /> -->
-          <span>{{ scope.row.createdate }}</span>
+          <span>{{ row.createdate }}</span>
         </template>
       </el-table-column>
       <el-table-column label="最後更新" width="160" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.lastupdate }}
+        <template slot-scope="{row}">
+          <span>{{ row.lastupdate }}</span>
         </template>
       </el-table-column>
       <el-table-column label="更新用戶" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.lastupdateuser }}
+        <template slot-scope="{row}">
+          <span>{{ row.lastupdateuser }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="200">
-        <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">
+        <template slot-scope="{row}">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">
             編輯
           </el-button>
           <el-button
             size="mini"
             type="danger"
-            @click="handleDelete(scope.row)">
+            @click="handleDelete(row)">
             删除
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <!-- <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /> -->
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getDepartments" />
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
         <el-form-item label="記錄編號" prop="departmentid">
@@ -109,7 +114,7 @@
         <el-form-item label="最後更新" prop="timestamp">
           <el-date-picker v-model="temp.lastupdate" type="datetime" value-format="yyyy-MM-dd" readonly="true" />
         </el-form-item>
-        <el-form-item label="修改用戶" prop="lastupdateuser" >
+        <el-form-item label="修改用戶" prop="lastupdateuser">
           <el-input v-model="temp.lastupdateuser" readonly="true" />
         </el-form-item>
       </el-form>
@@ -136,19 +141,18 @@
 </template>
 
 <script>
-// import { getList } from '@/api/table'
 import axios from 'axios'
-// import waves from '@/directive/waves' // waves directive
-// eslint-disable-next-line no-unused-vars
+import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
+import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { formatDate } from '@/utils/formatfunct'
 import { formatDateTime } from '@/utils/formatfunct'
-// import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
-//  components: { Pagination },
-// directives: { waves },
-  filters: {
+  name: 'DepartmentList',
+  components: { Pagination },
+  directives: { waves },
+/*   filters: {
     statusFilter(status) {
       const statusMap = {
         published: 'success',
@@ -157,29 +161,27 @@ export default {
       }
       return statusMap[status]
     }
-    /*     typeFilter(type) {
+        typeFilter(type) {
       return calendarTypeKeyValue[type]
-    } */
-  },
+    }
+  }, */
   data() {
     return {
       tableKey: 0,
       total: 0,
-      list: [],
+      list: null,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        description: undefined,
+        sort: '+departmentid'
       },
-      importanceOptions: [1, 2, 3],
+      // importanceOptions: [1, 2, 3],
       // calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+departmentid' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
+      // sortOptions: [{ label: 'ID Ascending', key: '+departmentid' }, { label: 'ID Descending', key: '-departmentid' }],
+      // statusOptions: ['published', 'draft', 'deleted'],
+      // showReviewer: false,
       temp: {
         departmentid: undefined,
         description: '',
@@ -204,23 +206,51 @@ export default {
     }
   },
   created() {
-    console.log('Hello from Vue!')
+    console.log('departmentlist created !')
     this.getDepartments()
   },
   methods: {
+    bb: function () {
+      return 2
+    },
+    aa: function(list, value) {
+      return list.filter(item => {
+        return item.description.indexOf(value) > -1
+      })
+    },
     getDepartments: function() {
       this.listLoading = true
+      let search=this.listQuery.description
       axios.get('http://localhost/api/department.php?action=read')
         .then((response) => {
           console.log(response.data)
-          this.list = response.data
-          this.total = response.data.total
-          this.listLoading = false
+          if (this.listQuery.description) {
+            this.list = response.data
+            this.list = this.list.filter(function(item, index, array) {
+              return String(item.description).includes(search)
+            })
+          } else {
+            this.list = response.data
+          }
+
+          this.total = this.list.length
+
+          if (this.listQuery.sort === '-departmentid') {
+            this.list = this.list.reverse()
+          }
+
+          this.list = this.list.filter((item, index) => index < this.listQuery.limit * this.listQuery.page && index >= this.listQuery.limit * (this.listQuery.page - 1))
+
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
         })
         .catch((error) => {
           console.log(error)
         })
     },
+
     resetTemp() {
       this.temp = {
         departmentid: 'New',
@@ -239,6 +269,24 @@ export default {
         form_data.append(key, obj[key])
       }
       return form_data
+    },
+    handleFilter() {
+      this.listQuery.page = 1
+      this.getDepartments()
+    },
+    sortChange(data) {
+      const { prop, order } = data
+      if (prop === 'departmentid') {
+        this.sortByID(order)
+      }
+    },
+    sortByID(order) {
+      if (order === 'ascending') {
+        this.listQuery.sort = '+departmentid'
+      } else {
+        this.listQuery.sort = '-departmentid'
+      }
+      this.handleFilter()
     },
     handleCreate() {
       this.resetTemp()
@@ -352,20 +400,15 @@ export default {
           console.log(response)
         })
     }
+  },
+  getSortClass: function(key) {
+    const sort = this.listQuery.sort
+    return sort === `+${key}`
+      ? 'ascending'
+      : sort === `-${key}`
+        ? 'descending'
+        : ''
   }
-  /*     handleSubmit() {
-      const t = this
-      t.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          alert('submit!')
-          // console.log(this.dataForm)
-        } else {
-          console.log('error submit!!')
-        //  return false;
-        }
-      })
-    } */
-
 }
 
 </script>
