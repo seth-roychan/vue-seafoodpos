@@ -2,23 +2,14 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.description" placeholder="Description" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-<!--         <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Add
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export
+      <el-button class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+        Export PDF
       </el-button>
     </div>
 
@@ -82,7 +73,8 @@
           <el-button
             size="mini"
             type="danger"
-            @click="handleDelete(row)">
+            @click="handleDelete(row)"
+          >
             删除
           </el-button>
         </template>
@@ -152,19 +144,6 @@ export default {
   name: 'DepartmentList',
   components: { Pagination },
   directives: { waves },
-/*   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
-        typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    }
-  }, */
   data() {
     return {
       tableKey: 0,
@@ -202,7 +181,8 @@ export default {
       pvData: [],
       rules: { active: [{ required: true, message: 'Active is required', trigger: 'blur' }],
         description: [{ required: true, message: 'Description is required', trigger: 'blur' }]
-      }
+      },
+      downloadLoading: false
     }
   },
   created() {
@@ -210,17 +190,9 @@ export default {
     this.getDepartments()
   },
   methods: {
-    bb: function () {
-      return 2
-    },
-    aa: function(list, value) {
-      return list.filter(item => {
-        return item.description.indexOf(value) > -1
-      })
-    },
     getDepartments: function() {
       this.listLoading = true
-      let search=this.listQuery.description
+      const search = this.listQuery.description
       axios.get('http://localhost/api/department.php?action=read')
         .then((response) => {
           console.log(response.data)
@@ -250,7 +222,6 @@ export default {
           console.log(error)
         })
     },
-
     resetTemp() {
       this.temp = {
         departmentid: 'New',
@@ -305,19 +276,6 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      /*       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        }) */
-      this.downloadLoading = false
     },
     handleDelete(row) {
       this.$notify({
@@ -399,15 +357,39 @@ export default {
           // handle error
           console.log(response)
         })
+    },
+    handleDownload() {
+      this.downloadLoading = true
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['departmentid', 'description', 'priority', 'defaultrecord', 'active']
+        const filterVal = ['departmentid', 'description', 'priority', 'defaultrecord', 'active']
+        const data = this.formatJson(filterVal, this.list)
+        //const data = this.list
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: 'department-list'
+        })
+        this.downloadLoading = false
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'aaa') {
+          return parseTime(v[j])
+        } else {
+          return v[j]
+        }
+      }))
+    },
+    getSortClass: function(key) {
+      const sort = this.listQuery.sort
+      return sort === `+${key}`
+        ? 'ascending'
+        : sort === `-${key}`
+          ? 'descending'
+          : ''
     }
-  },
-  getSortClass: function(key) {
-    const sort = this.listQuery.sort
-    return sort === `+${key}`
-      ? 'ascending'
-      : sort === `-${key}`
-        ? 'descending'
-        : ''
   }
 }
 
