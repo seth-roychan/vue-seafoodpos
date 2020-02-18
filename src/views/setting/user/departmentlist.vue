@@ -3,13 +3,13 @@
     <div class="filter-container">
       <el-input v-model="listQuery.description" placeholder="Description" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        Search
+        搜尋
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        Add
+        新增
       </el-button>
-      <el-button class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export PDF
+      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+        匯出PDF
       </el-button>
     </div>
 
@@ -41,12 +41,13 @@
       </el-table-column>
       <el-table-column label="預設記錄" width="110" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.defaultrecord }}</span>
+          <!-- <el-checkbox :checked="row.defaultrecord" onclick="return false" /> -->
+          <input v-model="row.defaultrecord" type="checkbox" onclick="return false">
         </template>
       </el-table-column>
       <el-table-column label="記錄狀態" width="110" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.active }}</span>
+          <input v-model="row.active" type="checkbox" onclick="return false">
         </template>
       </el-table-column>
       <el-table-column align="center" prop="createdate" label="建檔日期" width="100">
@@ -112,11 +113,11 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
-          Cancel
+          取消
         </el-button>
         <!-- <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()"> -->
         <el-button type="primary" @click="handleSubmit()">
-          Confirm
+          儲存
         </el-button>
       </div>
     </el-dialog>
@@ -156,11 +157,6 @@ export default {
         description: undefined,
         sort: '+departmentid'
       },
-      // importanceOptions: [1, 2, 3],
-      // calendarTypeOptions,
-      // sortOptions: [{ label: 'ID Ascending', key: '+departmentid' }, { label: 'ID Descending', key: '-departmentid' }],
-      // statusOptions: ['published', 'draft', 'deleted'],
-      // showReviewer: false,
       temp: {
         departmentid: undefined,
         description: '',
@@ -361,10 +357,9 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['departmentid', 'description', 'priority', 'defaultrecord', 'active']
-        const filterVal = ['departmentid', 'description', 'priority', 'defaultrecord', 'active']
+        const tHeader = ['記錄編號', '名稱描述', '排序優先', '預設記錄', '記錄狀態', '建檔日期', '最後更新', '更新用戶']
+        const filterVal = ['departmentid', 'description', 'priority', 'defaultrecord', 'active', 'createdate', 'lastupdate', 'lastupdateuser']
         const data = this.formatJson(filterVal, this.list)
-        //const data = this.list
         excel.export_json_to_excel({
           header: tHeader,
           data,
@@ -375,7 +370,7 @@ export default {
     },
     formatJson(filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {
-        if (j === 'aaa') {
+        if (j === 'timestamp') {
           return parseTime(v[j])
         } else {
           return v[j]
