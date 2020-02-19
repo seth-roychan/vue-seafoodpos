@@ -95,16 +95,16 @@
         <el-form-item label="排序優先" prop="priority">
           <el-input-number v-model.number="temp.priority" type="number" :min="1" :max="99" />
         </el-form-item>
-        <el-form-item label="預設記錄">
-          <el-switch v-model="temp.defaultrecord" :active-value="1" :inactive-value="0" />
+        <el-form-item label="預設記錄" prod="defaultrecord">
+          <el-switch v-model="temp.defaultrecord" :disabled="isDisabled" :active-value="1" :inactive-value="0" />
         </el-form-item>
-        <el-form-item label="記錄狀態">
-          <el-switch v-model="temp.active" :active-value="1" :inactive-value="0" />
+        <el-form-item label="記錄狀態" prod="active">
+          <el-switch v-model="temp.active" :disabled="isDisabled" :active-value="1" :inactive-value="0" />
         </el-form-item>
-        <el-form-item label="建檔日期" prop="datestamp">
+        <el-form-item label="建檔日期" prop="createdate">
           <el-date-picker v-model="temp.createdate" type="date" value-format="yyyy-MM-dd" readonly="true" />
         </el-form-item>
-        <el-form-item label="最後更新" prop="timestamp">
+        <el-form-item label="最後更新" prop="lastupdate">
           <el-date-picker v-model="temp.lastupdate" type="datetime" value-format="yyyy-MM-dd" readonly="true" />
         </el-form-item>
         <el-form-item label="修改用戶" prop="lastupdateuser">
@@ -141,6 +141,8 @@ import Pagination from '@/components/Pagination' // secondary package based on e
 import { formatDate } from '@/utils/formatfunct'
 import { formatDateTime } from '@/utils/formatfunct'
 
+
+
 export default {
   name: 'DepartmentList',
   components: { Pagination },
@@ -165,7 +167,8 @@ export default {
         active: 1,
         createdate: new Date(),
         lastupdate: new Date(),
-        lastupdateuser: ''
+        lastupdateuser: '',
+        readonly: 0
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -175,10 +178,20 @@ export default {
       },
       dialogPvVisible: false,
       pvData: [],
-      rules: { active: [{ required: true, message: 'Active is required', trigger: 'blur' }],
-        description: [{ required: true, message: 'Description is required', trigger: 'blur' }]
+      rules: { active: [{ required: true, message: 'Active is required', trigger: 'change', validator: 'chkactive'}],
+        description: [{ required: true, message: 'Description is required', trigger: 'blur' }],
+        defaultrecord: [{ required: true, message: 'Defaultrecord is required', trigger: 'change' }]
       },
       downloadLoading: false
+    }
+  },
+  computed: {
+    isDisabled: function(row) {
+      if (this.temp.readonly === 1) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   created() {
@@ -186,6 +199,20 @@ export default {
     this.getDepartments()
   },
   methods: {
+    chkactive: function(rule, value, callback) {
+      // 自定义校验规则
+      if (!value) {
+        if (this.temp.defaultrecord === 1) {
+          if (value === 0) {
+            return callback(new Error('預設記錄不能取消啟用狀態'))         
+          } else {
+            callback()
+          }
+        } else {
+          callback()
+        }
+      }
+    },
     getDepartments: function() {
       this.listLoading = true
       const search = this.listQuery.description
@@ -227,7 +254,8 @@ export default {
         active: 1,
         createdate: new Date(),
         lastupdate: new Date(),
-        lastupdateuser: 'Admin'
+        lastupdateuser: 'Admin',
+        readonly: 0
       }
     },
     toFormData: function(obj) {
@@ -269,6 +297,7 @@ export default {
       this.temp.lastupdateuser = 'Admin'
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.temp.readonly = this.temp.defaultrecord
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
